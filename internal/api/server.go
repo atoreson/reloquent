@@ -96,6 +96,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/source/test-connection", s.handleTestSourceConnection)
 	mux.HandleFunc("POST /api/source/discover", s.handleDiscover)
 	mux.HandleFunc("GET /api/source/schema", s.handleGetSchema)
+	mux.HandleFunc("GET /api/target/config", s.handleGetTargetConfig)
 	mux.HandleFunc("POST /api/target/test-connection", s.handleTestTargetConnection)
 	mux.HandleFunc("POST /api/target/detect-topology", s.handleDetectTopology)
 	mux.HandleFunc("GET /api/tables", s.handleGetTables)
@@ -196,6 +197,9 @@ func (s *Server) handleDiscover(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) handleGetSchema(w http.ResponseWriter, r *http.Request) {
 	s.handleGetSchemaImpl(w, r)
+}
+func (s *Server) handleGetTargetConfig(w http.ResponseWriter, r *http.Request) {
+	s.handleGetTargetConfigImpl(w, r)
 }
 func (s *Server) handleTestTargetConnection(w http.ResponseWriter, r *http.Request) {
 	s.handleTestTargetConnectionImpl(w, r)

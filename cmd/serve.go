@@ -51,6 +51,19 @@ var serveCmd = &cobra.Command{
 
 		eng := engine.New(cfg, logger)
 
+		// Seed state from config so the UI can pre-fill connection forms
+		if cfg != nil {
+			if st, err := eng.LoadState(); err == nil {
+				if st.SourceConfig == nil && cfg.Source.Host != "" {
+					st.SourceConfig = &cfg.Source
+				}
+				if st.TargetConfig == nil && cfg.Target.ConnectionString != "" {
+					st.TargetConfig = &cfg.Target
+				}
+				_ = eng.SaveState()
+			}
+		}
+
 		hub := ws.NewHub(logger)
 		hub.SetStateProvider(func() ([]byte, error) {
 			st, err := eng.LoadState()

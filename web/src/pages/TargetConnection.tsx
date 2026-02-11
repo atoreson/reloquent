@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormField, Input } from "../components/FormField";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
 import { StatusBadge } from "../components/StatusBadge";
 import {
+  useTargetConfig,
   useTestTargetConnection,
   useDetectTopology,
   useSetStep,
@@ -18,9 +19,16 @@ export default function TargetConnection() {
 
   const [topology, setTopology] = useState<TopologyInfo | null>(null);
 
+  const targetConfig = useTargetConfig();
   const testConn = useTestTargetConnection();
   const detectTopo = useDetectTopology();
   const setStep = useSetStep();
+
+  useEffect(() => {
+    if (targetConfig.data && targetConfig.data.connection_string) {
+      setForm((f) => ({ ...f, ...targetConfig.data }));
+    }
+  }, [targetConfig.data]);
 
   const handleTestConnection = () => {
     testConn.mutate(form, {

@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"testing/fstest"
+	"time"
 
 	"github.com/reloquent/reloquent/internal/config"
 	"github.com/reloquent/reloquent/internal/engine"
@@ -412,7 +413,7 @@ func TestConfigureAWS_InvalidBody(t *testing.T) {
 }
 
 func TestImplementedEndpoints(t *testing.T) {
-	s, eng := testServer(t)
+	s, _ := testServer(t)
 	mux := serveMux(s)
 
 	// Endpoints that return real data (no 501s)
@@ -473,14 +474,24 @@ func TestImplementedEndpoints(t *testing.T) {
 		t.Errorf("POST /api/sizing/benchmark: status = %d, want %d", w.Code, http.StatusBadRequest)
 	}
 
-	// Start migration → 202 (async)
+	// Start migration → 202 (async) — tested separately to avoid
+	// goroutine writing state after TempDir cleanup
+}
+
+func TestStartMigration(t *testing.T) {
+	s, eng := testServer(t)
 	eng.State = &state.State{Steps: make(map[state.Step]state.StepState)}
-	req = httptest.NewRequest("POST", "/api/migration/start", nil)
-	w = httptest.NewRecorder()
+	mux := serveMux(s)
+
+	req := httptest.NewRequest("POST", "/api/migration/start", nil)
+	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 	if w.Code != http.StatusAccepted {
 		t.Errorf("POST /api/migration/start: status = %d, want %d", w.Code, http.StatusAccepted)
 	}
+
+	// Wait for async goroutine to finish writing state
+	time.Sleep(100 * time.Millisecond)
 }
 
 func TestCORSMiddleware(t *testing.T) {

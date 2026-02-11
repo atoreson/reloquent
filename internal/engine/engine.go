@@ -49,8 +49,9 @@ type Engine struct {
 // New creates a new Engine with the given config and logger.
 func New(cfg *config.Config, logger *slog.Logger) *Engine {
 	return &Engine{
-		Config: cfg,
-		Logger: logger,
+		Config:    cfg,
+		Logger:    logger,
+		statePath: config.ExpandHome(state.DefaultPath),
 	}
 }
 

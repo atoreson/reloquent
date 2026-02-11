@@ -61,6 +61,13 @@ export function useSchema() {
   });
 }
 
+export function useTargetConfig() {
+  return useQuery<TargetConfig>({
+    queryKey: ["targetConfig"],
+    queryFn: () => api.get("/api/target/config"),
+  });
+}
+
 export function useTestTargetConnection() {
   return useMutation<ConnectionTestResult, Error, TargetConfig>({
     mutationFn: (cfg) => api.post("/api/target/test-connection", cfg),

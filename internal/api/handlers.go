@@ -117,6 +117,18 @@ func (s *Server) handleGetSchemaImpl(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, sch)
 }
 
+func (s *Server) handleGetTargetConfigImpl(w http.ResponseWriter, r *http.Request) {
+	cfg := s.engine.Config
+	if cfg == nil || cfg.Target.ConnectionString == "" {
+		jsonResponse(w, http.StatusOK, TargetConfigRequest{})
+		return
+	}
+	jsonResponse(w, http.StatusOK, TargetConfigRequest{
+		ConnectionString: cfg.Target.ConnectionString,
+		Database:         cfg.Target.Database,
+	})
+}
+
 func (s *Server) handleTestTargetConnectionImpl(w http.ResponseWriter, r *http.Request) {
 	var req TargetConfigRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
