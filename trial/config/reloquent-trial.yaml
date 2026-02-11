@@ -1,0 +1,15 @@
+version: 1
+
+source:
+  type: postgresql
+  host: postgres
+  port: 5432
+  database: pagila
+  schema: public
+  username: reloquent
+  password: reloquent
+
+target:
+  type: mongodb
+  connection_string: "mongodb://mongo:27017/?replicaSet=rs0"
+  database: pagila

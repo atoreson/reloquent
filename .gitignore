@@ -1,0 +1,60 @@
+# Go binaries and output
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go test output
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Go workspace
+go.work
+go.work.sum
+
+# Go vendor directory
+vendor/
+
+# Reloquent binary
+reloquent
+
+# goreleaser output
+dist/
+
+# Web UI build artifacts and dependencies
+web/build/
+web/dist/
+web/node_modules/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment and credentials
+*.env
+.env.*
+credentials.yaml
+credentials.yml
+
+# Reloquent local artifacts
+.reloquent/
+
+# Debug files
+__debug_bin*
+
+# Temporary files
+*.tmp
+*.bak
