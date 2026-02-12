@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
 import { TypeSelect } from "../components/TypeSelect";
+import { PageContainer } from "../components/PageContainer";
 import { useTypeMap, useSaveTypeMap, useNavigateToStep } from "../api/hooks";
 
 export default function TypeMapping() {
@@ -55,17 +56,20 @@ export default function TypeMapping() {
 
   if (isLoading) {
     return (
+      <PageContainer>
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
       </div>
+      </PageContainer>
     );
   }
 
   if (error) {
-    return <Alert type="error">{error.message}</Alert>;
+    return <PageContainer><Alert type="error">{error.message}</Alert></PageContainer>;
   }
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">Type Mapping</h2>
       <p className="mt-2 text-gray-600">
@@ -137,5 +141,6 @@ export default function TypeMapping() {
         </Button>
       </div>
     </div>
+    </PageContainer>
   );
 }

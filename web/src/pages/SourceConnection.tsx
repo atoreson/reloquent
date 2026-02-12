@@ -4,6 +4,7 @@ import { PasswordField } from "../components/PasswordField";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
 import { StatusBadge } from "../components/StatusBadge";
+import { PageContainer } from "../components/PageContainer";
 import {
   useSourceConfig,
   useTestSourceConnection,
@@ -69,6 +70,7 @@ export default function SourceConnection() {
   const isConnected = testConn.data?.success === true;
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">Source Connection</h2>
       <p className="mt-2 text-gray-600">
@@ -197,5 +199,6 @@ export default function SourceConnection() {
         </div>
       </div>
     </div>
+    </PageContainer>
   );
 }

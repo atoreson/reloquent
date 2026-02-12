@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProgressBar } from "../components/ProgressBar";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
+import { PageContainer } from "../components/PageContainer";
 import { useNavigateToStep } from "../api/hooks";
 import { api } from "../api/client";
 
@@ -27,6 +28,7 @@ export default function IndexBuilds() {
     indexes && indexes.length > 0 && indexes.every((i) => i.phase === "complete");
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">Index Builds</h2>
       <p className="mt-2 text-gray-600">
@@ -92,5 +94,6 @@ export default function IndexBuilds() {
         </div>
       )}
     </div>
+    </PageContainer>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FormField, Input, Select } from "../components/FormField";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
+import { PageContainer } from "../components/PageContainer";
 import { useConfigureAWS, useNavigateToStep } from "../api/hooks";
 import type { AWSConfig } from "../api/types";
 
@@ -40,6 +41,7 @@ export default function AWSSetup() {
   };
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">AWS Setup</h2>
       <p className="mt-2 text-gray-600">
@@ -98,5 +100,6 @@ export default function AWSSetup() {
         </div>
       </div>
     </div>
+    </PageContainer>
   );
 }

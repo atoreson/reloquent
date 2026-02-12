@@ -3,6 +3,7 @@ import { FormField, Input } from "../components/FormField";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
 import { StatusBadge } from "../components/StatusBadge";
+import { PageContainer } from "../components/PageContainer";
 import {
   useTargetConfig,
   useTestTargetConnection,
@@ -49,6 +50,7 @@ export default function TargetConnection() {
   const isConnected = testConn.data?.success === true;
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">Target Connection</h2>
       <p className="mt-2 text-gray-600">
@@ -135,5 +137,6 @@ export default function TargetConnection() {
         </div>
       </div>
     </div>
+    </PageContainer>
   );
 }

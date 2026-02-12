@@ -3,6 +3,7 @@ import { ReadinessCheck } from "../components/ReadinessCheck";
 import { NextSteps } from "../components/NextSteps";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
+import { PageContainer } from "../components/PageContainer";
 import { api } from "../api/client";
 
 interface ReadinessData {
@@ -53,6 +54,7 @@ export default function Readiness() {
   };
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">
         Production Readiness
@@ -100,5 +102,6 @@ export default function Readiness() {
         </div>
       </div>
     </div>
+    </PageContainer>
   );
 }

@@ -1,5 +1,6 @@
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
+import { PageContainer } from "../components/PageContainer";
 import { useWizardState, useNavigateToStep } from "../api/hooks";
 
 export default function Review() {
@@ -16,6 +17,7 @@ export default function Review() {
     : 0;
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">Review</h2>
       <p className="mt-2 text-gray-600">
@@ -51,5 +53,6 @@ export default function Review() {
         </div>
       </div>
     </div>
+    </PageContainer>
   );
 }

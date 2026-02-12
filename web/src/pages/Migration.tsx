@@ -4,6 +4,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { FailureDialog } from "../components/FailureDialog";
 import { Alert } from "../components/Alert";
 import { Button } from "../components/Button";
+import { PageContainer } from "../components/PageContainer";
 import { useNavigateToStep } from "../api/hooks";
 import { api } from "../api/client";
 
@@ -49,6 +50,7 @@ export default function Migration() {
   const hasFailed = failedCollections.length > 0;
 
   return (
+    <PageContainer>
     <div>
       <h2 className="text-2xl font-bold text-gray-900">Migration</h2>
       <p className="mt-2 text-gray-600">
@@ -175,5 +177,6 @@ export default function Migration() {
         onClose={() => setShowFailure(false)}
       />
     </div>
+    </PageContainer>
   );
 }

@@ -194,12 +194,12 @@ export default function DenormDesign() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="flex flex-col h-full p-4 gap-3">
+      <div className="shrink-0">
         <h2 className="text-2xl font-bold text-gray-900">
           Denormalization Design
         </h2>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-1 text-gray-600 text-sm">
           Design how source tables map to MongoDB documents. Click an edge to
           configure the relationship. Drag from one node to another to create a
           new relationship.
@@ -223,8 +223,8 @@ export default function DenormDesign() {
         saving={saveMapping.isPending}
       />
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 h-[500px] rounded-lg border border-gray-200 overflow-hidden relative">
+      <div className="grid grid-cols-[1fr_300px] gap-4 min-h-0 flex-1">
+        <div className="rounded-lg border border-gray-200 overflow-hidden relative">
           <ReactFlowProvider>
             <DesignerCanvas
               schema={schema}
@@ -247,7 +247,7 @@ export default function DenormDesign() {
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto">
           <DocumentPreview
             json={previewJson}
             collectionName={selectedCollection}
