@@ -2,11 +2,11 @@ import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
 import { ExplanationCard } from "../components/ExplanationCard";
 import { CostEstimate } from "../components/CostEstimate";
-import { useSizing, useSetStep } from "../api/hooks";
+import { useSizing, useNavigateToStep } from "../api/hooks";
 
 export default function Sizing() {
   const { data: plan, isLoading, error } = useSizing();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   if (isLoading) {
     return (
@@ -111,8 +111,8 @@ export default function Sizing() {
       )}
 
       <div className="mt-6 flex gap-3">
-        <Button onClick={() => setStep.mutate("aws_setup")}>
-          Continue to AWS Setup
+        <Button onClick={() => goToStep("review")}>
+          Continue to Review
         </Button>
       </div>
     </div>

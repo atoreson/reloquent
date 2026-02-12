@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/reloquent/reloquent/internal/aws"
 	"github.com/reloquent/reloquent/internal/benchmark"
@@ -97,13 +98,28 @@ func (e *Engine) NavigateToStep(step state.Step) error {
 	if targetIdx == -1 {
 		return fmt.Errorf("unknown step: %s", step)
 	}
-	if targetIdx > currentIdx {
-		return fmt.Errorf("cannot navigate ahead to step %s (current: %s)", step, st.CurrentStep)
+	if targetIdx > currentIdx+1 {
+		return fmt.Errorf("cannot skip ahead to step %s (current: %s)", step, st.CurrentStep)
 	}
 
 	st.CurrentStep = step
 	e.State = st
 	return e.SaveState()
+}
+
+// CompleteCurrentStep marks the current step as complete in state.
+func (e *Engine) CompleteCurrentStep() {
+	if e.State == nil {
+		return
+	}
+	if e.State.Steps == nil {
+		e.State.Steps = make(map[state.Step]state.StepState)
+	}
+	e.State.Steps[e.State.CurrentStep] = state.StepState{
+		Status:      "complete",
+		CompletedAt: time.Now(),
+	}
+	_ = e.SaveState()
 }
 
 // SetSourceConfig sets the source database configuration.
@@ -788,14 +804,14 @@ func buildPgConnString(src config.SourceConfig) string {
 func allStepsOrdered() []state.Step {
 	return []state.Step{
 		state.StepSourceConnection,
-		state.StepTargetConnection,
 		state.StepTableSelection,
 		state.StepDenormalization,
 		state.StepTypeMapping,
 		state.StepSizing,
+		state.StepReview,
+		state.StepTargetConnection,
 		state.StepAWSSetup,
 		state.StepPreMigration,
-		state.StepReview,
 		state.StepMigration,
 		state.StepValidation,
 		state.StepIndexBuilds,

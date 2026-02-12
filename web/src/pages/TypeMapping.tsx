@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
 import { TypeSelect } from "../components/TypeSelect";
-import { useTypeMap, useSaveTypeMap, useSetStep } from "../api/hooks";
+import { useTypeMap, useSaveTypeMap, useNavigateToStep } from "../api/hooks";
 
 export default function TypeMapping() {
   const { data: entries, isLoading, error } = useTypeMap();
   const saveTypeMap = useSaveTypeMap();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [initialized, setInitialized] = useState(false);
 
@@ -43,7 +43,7 @@ export default function TypeMapping() {
 
   const handleSave = () => {
     saveTypeMap.mutate(overrides, {
-      onSuccess: () => setStep.mutate("sizing"),
+      onSuccess: () => goToStep("sizing"),
     });
   };
 

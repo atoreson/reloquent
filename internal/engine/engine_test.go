@@ -101,16 +101,34 @@ func TestNavigateToStep_Backward(t *testing.T) {
 	}
 }
 
-func TestNavigateToStep_Forward(t *testing.T) {
+func TestNavigateToStep_ForwardOneStep(t *testing.T) {
 	e := testEngine(t)
 
 	// Start at source_connection (default)
 	e.LoadState()
 
-	// Try to navigate forward — should fail
+	// One step forward (source_connection → table_selection) should succeed
 	err := e.NavigateToStep(state.StepTableSelection)
+	if err != nil {
+		t.Fatalf("NavigateToStep one step forward should succeed: %v", err)
+	}
+
+	st, _ := e.LoadState()
+	if st.CurrentStep != state.StepTableSelection {
+		t.Errorf("CurrentStep = %q, want %q", st.CurrentStep, state.StepTableSelection)
+	}
+}
+
+func TestNavigateToStep_SkipAhead(t *testing.T) {
+	e := testEngine(t)
+
+	// Start at source_connection (default)
+	e.LoadState()
+
+	// Skipping multiple steps should fail
+	err := e.NavigateToStep(state.StepDenormalization)
 	if err == nil {
-		t.Error("expected error navigating forward")
+		t.Error("expected error when skipping multiple steps forward")
 	}
 }
 

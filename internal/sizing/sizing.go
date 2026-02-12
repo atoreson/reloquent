@@ -22,31 +22,31 @@ type Input struct {
 
 // SizingPlan contains the complete sizing recommendations.
 type SizingPlan struct {
-	SparkPlan     SparkPlan     `yaml:"spark_plan"`
-	MongoPlan     MongoPlan     `yaml:"mongo_plan"`
-	ShardPlan     *ShardingPlan `yaml:"shard_plan,omitempty"`
-	EstimatedTime time.Duration `yaml:"estimated_time"`
-	Explanations  []Explanation `yaml:"explanations"`
+	SparkPlan     SparkPlan     `yaml:"spark_plan" json:"spark_plan"`
+	MongoPlan     MongoPlan     `yaml:"mongo_plan" json:"mongo_plan"`
+	ShardPlan     *ShardingPlan `yaml:"shard_plan,omitempty" json:"shard_plan,omitempty"`
+	EstimatedTime time.Duration `yaml:"estimated_time" json:"estimated_time"`
+	Explanations  []Explanation `yaml:"explanations" json:"explanations"`
 }
 
 // SparkPlan describes the recommended Spark cluster configuration.
 type SparkPlan struct {
-	Platform     string  `yaml:"platform"`      // "emr" or "glue"
-	InstanceType string  `yaml:"instance_type"`  // e.g. "r5.4xlarge"
-	WorkerCount  int     `yaml:"worker_count"`
-	DPUCount     int     `yaml:"dpu_count"`      // Glue only
-	CostEstimate string  `yaml:"cost_estimate"`
-	CostLow      float64 `yaml:"cost_low"`
-	CostHigh     float64 `yaml:"cost_high"`
+	Platform     string  `yaml:"platform" json:"platform"`
+	InstanceType string  `yaml:"instance_type" json:"instance_type"`
+	WorkerCount  int     `yaml:"worker_count" json:"worker_count"`
+	DPUCount     int     `yaml:"dpu_count" json:"dpu_count"`
+	CostEstimate string  `yaml:"cost_estimate" json:"cost_estimate"`
+	CostLow      float64 `yaml:"cost_low" json:"cost_low"`
+	CostHigh     float64 `yaml:"cost_high" json:"cost_high"`
 }
 
 // MongoPlan describes the recommended MongoDB tier.
 type MongoPlan struct {
-	MigrationTier   string `yaml:"migration_tier"`   // oversized for speed
-	ProductionTier  string `yaml:"production_tier"`   // right-sized
-	StorageGB       int64  `yaml:"storage_gb"`
-	MigrationRAMGB  int    `yaml:"migration_ram_gb"`
-	ProductionRAMGB int    `yaml:"production_ram_gb"`
+	MigrationTier   string `yaml:"migration_tier" json:"migration_tier"`
+	ProductionTier  string `yaml:"production_tier" json:"production_tier"`
+	StorageGB       int64  `yaml:"storage_gb" json:"storage_gb"`
+	MigrationRAMGB  int    `yaml:"migration_ram_gb" json:"migration_ram_gb"`
+	ProductionRAMGB int    `yaml:"production_ram_gb" json:"production_ram_gb"`
 }
 
 // Calculate computes a complete sizing plan from the given input.

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ReactFlow,
   Controls,
@@ -124,9 +124,14 @@ export function DesignerCanvas({
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { fitView } = useReactFlow();
   const fitViewCalled = useRef(false);
+
+  // Sync edges when mapping changes
+  useEffect(() => {
+    setEdges(initialEdges);
+  }, [initialEdges, setEdges]);
 
   // Auto-fit on first render
   if (!fitViewCalled.current && nodes.length > 0) {

@@ -10,35 +10,35 @@ import (
 
 // Mapping defines how source tables map to MongoDB collections.
 type Mapping struct {
-	Collections []Collection `yaml:"collections"`
+	Collections []Collection `yaml:"collections" json:"collections"`
 }
 
 // Collection represents a target MongoDB collection.
 type Collection struct {
-	Name            string           `yaml:"name"`
-	SourceTable     string           `yaml:"source_table"`
-	Embedded        []Embedded       `yaml:"embedded,omitempty"`
-	References      []Reference      `yaml:"references,omitempty"`
-	Transformations []Transformation `yaml:"transformations,omitempty"`
+	Name            string           `yaml:"name" json:"name"`
+	SourceTable     string           `yaml:"source_table" json:"source_table"`
+	Embedded        []Embedded       `yaml:"embedded,omitempty" json:"embedded,omitempty"`
+	References      []Reference      `yaml:"references,omitempty" json:"references,omitempty"`
+	Transformations []Transformation `yaml:"transformations,omitempty" json:"transformations,omitempty"`
 }
 
 // Embedded represents a table whose rows are embedded as subdocuments.
 type Embedded struct {
-	SourceTable     string           `yaml:"source_table"`
-	FieldName       string           `yaml:"field_name"`
-	Relationship    string           `yaml:"relationship"` // array or single
-	JoinColumn      string           `yaml:"join_column"`
-	ParentColumn    string           `yaml:"parent_column"`
-	Embedded        []Embedded       `yaml:"embedded,omitempty"`        // recursive nesting
-	Transformations []Transformation `yaml:"transformations,omitempty"` // per-embedded transforms
+	SourceTable     string           `yaml:"source_table" json:"source_table"`
+	FieldName       string           `yaml:"field_name" json:"field_name"`
+	Relationship    string           `yaml:"relationship" json:"relationship"`
+	JoinColumn      string           `yaml:"join_column" json:"join_column"`
+	ParentColumn    string           `yaml:"parent_column" json:"parent_column"`
+	Embedded        []Embedded       `yaml:"embedded,omitempty" json:"embedded,omitempty"`
+	Transformations []Transformation `yaml:"transformations,omitempty" json:"transformations,omitempty"`
 }
 
 // Reference represents a table kept as a separate collection, linked by a field.
 type Reference struct {
-	SourceTable  string `yaml:"source_table"`
-	FieldName    string `yaml:"field_name"`
-	JoinColumn   string `yaml:"join_column"`
-	ParentColumn string `yaml:"parent_column"`
+	SourceTable  string `yaml:"source_table" json:"source_table"`
+	FieldName    string `yaml:"field_name" json:"field_name"`
+	JoinColumn   string `yaml:"join_column" json:"join_column"`
+	ParentColumn string `yaml:"parent_column" json:"parent_column"`
 }
 
 // WriteYAML writes the mapping to a YAML file at the given path.
@@ -70,10 +70,10 @@ func LoadYAML(path string) (*Mapping, error) {
 
 // Transformation defines a per-field transformation rule.
 type Transformation struct {
-	SourceField string `yaml:"source_field"`
-	Operation   string `yaml:"operation"` // rename, compute, cast, filter, default, exclude
-	Value       string `yaml:"value,omitempty"`
-	TargetField string `yaml:"target_field,omitempty"`
-	TargetType  string `yaml:"target_type,omitempty"`
-	Expression  string `yaml:"expression,omitempty"`
+	SourceField string `yaml:"source_field" json:"source_field"`
+	Operation   string `yaml:"operation" json:"operation"`
+	Value       string `yaml:"value,omitempty" json:"value,omitempty"`
+	TargetField string `yaml:"target_field,omitempty" json:"target_field,omitempty"`
+	TargetType  string `yaml:"target_type,omitempty" json:"target_type,omitempty"`
+	Expression  string `yaml:"expression,omitempty" json:"expression,omitempty"`
 }

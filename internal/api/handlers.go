@@ -105,6 +105,9 @@ func (s *Server) handleDiscoverImpl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Mark source_connection as complete
+	s.engine.CompleteCurrentStep()
+
 	jsonResponse(w, http.StatusOK, sch)
 }
 

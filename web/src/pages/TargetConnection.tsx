@@ -7,7 +7,7 @@ import {
   useTargetConfig,
   useTestTargetConnection,
   useDetectTopology,
-  useSetStep,
+  useNavigateToStep,
 } from "../api/hooks";
 import type { TargetConfig, TopologyInfo } from "../api/types";
 
@@ -22,7 +22,7 @@ export default function TargetConnection() {
   const targetConfig = useTargetConfig();
   const testConn = useTestTargetConnection();
   const detectTopo = useDetectTopology();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   useEffect(() => {
     if (targetConfig.data && targetConfig.data.connection_string) {
@@ -43,7 +43,7 @@ export default function TargetConnection() {
   };
 
   const handleContinue = () => {
-    setStep.mutate("table_selection");
+    goToStep("aws_setup");
   };
 
   const isConnected = testConn.data?.success === true;
@@ -130,7 +130,7 @@ export default function TargetConnection() {
             Test Connection
           </Button>
           <Button onClick={handleContinue} disabled={!isConnected}>
-            Continue
+            Continue to AWS Setup
           </Button>
         </div>
       </div>

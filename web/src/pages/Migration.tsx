@@ -4,7 +4,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { FailureDialog } from "../components/FailureDialog";
 import { Alert } from "../components/Alert";
 import { Button } from "../components/Button";
-import { useSetStep } from "../api/hooks";
+import { useNavigateToStep } from "../api/hooks";
 import { api } from "../api/client";
 
 interface MigrationStatus {
@@ -30,7 +30,7 @@ interface MigrationStatus {
 }
 
 export default function Migration() {
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
   const [showFailure, setShowFailure] = useState(false);
 
   const { data: status } = useQuery<MigrationStatus>({
@@ -144,7 +144,7 @@ export default function Migration() {
               </Button>
             )}
             {isComplete && (
-              <Button onClick={() => setStep.mutate("validation")}>
+              <Button onClick={() => goToStep("validation")}>
                 Continue to Validation
               </Button>
             )}

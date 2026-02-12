@@ -34,51 +34,51 @@ type Operator interface {
 
 // TopologyInfo describes the MongoDB target topology.
 type TopologyInfo struct {
-	Type          string `yaml:"type"` // "atlas", "replica_set", "sharded", "standalone"
-	IsAtlas       bool   `yaml:"is_atlas"`
-	ShardCount    int    `yaml:"shard_count"`
-	ServerVersion string `yaml:"server_version"`
-	StorageBytes  int64  `yaml:"storage_bytes"`
+	Type          string `yaml:"type" json:"type"`
+	IsAtlas       bool   `yaml:"is_atlas" json:"is_atlas"`
+	ShardCount    int    `yaml:"shard_count" json:"shard_count"`
+	ServerVersion string `yaml:"server_version" json:"server_version"`
+	StorageBytes  int64  `yaml:"storage_bytes" json:"storage_bytes"`
 }
 
 // ValidationResult holds the outcome of target validation.
 type ValidationResult struct {
-	Passed   bool              `yaml:"passed"`
-	Warnings []ValidationIssue `yaml:"warnings,omitempty"`
-	Errors   []ValidationIssue `yaml:"errors,omitempty"`
+	Passed   bool              `yaml:"passed" json:"passed"`
+	Warnings []ValidationIssue `yaml:"warnings,omitempty" json:"warnings,omitempty"`
+	Errors   []ValidationIssue `yaml:"errors,omitempty" json:"errors,omitempty"`
 }
 
 // ValidationIssue describes a validation warning or error.
 type ValidationIssue struct {
-	Category   string `yaml:"category"` // "storage", "tier", "shard", "permission"
-	Message    string `yaml:"message"`
-	Suggestion string `yaml:"suggestion"`
+	Category   string `yaml:"category" json:"category"`
+	Message    string `yaml:"message" json:"message"`
+	Suggestion string `yaml:"suggestion" json:"suggestion"`
 }
 
 // IndexDefinition describes a single MongoDB index.
 type IndexDefinition struct {
-	Keys   []IndexKey
-	Name   string
-	Unique bool
+	Keys   []IndexKey `json:"keys"`
+	Name   string     `json:"name"`
+	Unique bool       `json:"unique"`
 }
 
 // IndexKey is a single field in a compound index.
 type IndexKey struct {
-	Field string
-	Order int // 1 or -1
+	Field string `json:"field"`
+	Order int    `json:"order"`
 }
 
 // CollectionIndex pairs a collection name with an index definition.
 type CollectionIndex struct {
-	Collection string
-	Index      IndexDefinition
+	Collection string          `json:"collection"`
+	Index      IndexDefinition `json:"index"`
 }
 
 // IndexBuildStatus reports progress of a background index build.
 type IndexBuildStatus struct {
-	Collection string
-	IndexName  string
-	Phase      string  // "building", "complete", "not_started"
-	Progress   float64 // 0-100
-	Message    string
+	Collection string  `json:"collection"`
+	IndexName  string  `json:"index_name"`
+	Phase      string  `json:"phase"`
+	Progress   float64 `json:"progress"`
+	Message    string  `json:"message"`
 }

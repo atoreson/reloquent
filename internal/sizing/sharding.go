@@ -12,20 +12,20 @@ import (
 
 // ShardingPlan describes whether and how to shard the MongoDB deployment.
 type ShardingPlan struct {
-	Recommended  bool              `yaml:"recommended"`
-	Collections  []CollectionShard `yaml:"collections"`
-	ShardCount   int               `yaml:"shard_count"`
-	Explanations []Explanation     `yaml:"explanations"`
+	Recommended  bool              `yaml:"recommended" json:"recommended"`
+	Collections  []CollectionShard `yaml:"collections" json:"collections"`
+	ShardCount   int               `yaml:"shard_count" json:"shard_count"`
+	Explanations []Explanation     `yaml:"explanations" json:"explanations"`
 }
 
 // CollectionShard describes the sharding configuration for a single collection.
 type CollectionShard struct {
-	CollectionName string            `yaml:"collection_name"`
-	ShardKey       map[string]string `yaml:"shard_key"`
-	IsHashed       bool              `yaml:"is_hashed"`
-	PreSplitCount  int               `yaml:"pre_split_count"`
-	PreSplitCmds   []string          `yaml:"pre_split_commands"`
-	Explanation    string            `yaml:"explanation"`
+	CollectionName string            `yaml:"collection_name" json:"collection_name"`
+	ShardKey       map[string]string `yaml:"shard_key" json:"shard_key"`
+	IsHashed       bool              `yaml:"is_hashed" json:"is_hashed"`
+	PreSplitCount  int               `yaml:"pre_split_count" json:"pre_split_count"`
+	PreSplitCmds   []string          `yaml:"pre_split_commands" json:"pre_split_commands"`
+	Explanation    string            `yaml:"explanation" json:"explanation"`
 }
 
 // ShardKeyInput provides information needed to recommend a shard key for a collection.

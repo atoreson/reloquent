@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ValidationResultCard } from "../components/ValidationResult";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
-import { useSetStep } from "../api/hooks";
+import { useNavigateToStep } from "../api/hooks";
 import { api } from "../api/client";
 
 interface ValidationResults {
@@ -17,7 +17,7 @@ interface ValidationResults {
 }
 
 export default function Validation() {
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   const { data: results } = useQuery<ValidationResults>({
     queryKey: ["validation-results"],
@@ -64,7 +64,7 @@ export default function Validation() {
 
           {(allPassed || results.status === "fail") && (
             <div className="flex gap-3">
-              <Button onClick={() => setStep.mutate("index_builds")}>
+              <Button onClick={() => goToStep("index_builds")}>
                 Continue to Index Builds
               </Button>
             </div>

@@ -12,31 +12,31 @@ import (
 
 // Status represents the current migration state.
 type Status struct {
-	Phase           string             `yaml:"phase"` // "preflight", "provisioning", "running", "completed", "failed", "partial_failure"
-	Overall         ProgressInfo       `yaml:"overall"`
-	Collections     []CollectionStatus `yaml:"collections"`
-	ElapsedTime     time.Duration      `yaml:"elapsed_time"`
-	EstimatedRemain time.Duration      `yaml:"estimated_remain"`
-	Errors          []string           `yaml:"errors,omitempty"`
+	Phase           string             `yaml:"phase" json:"phase"`
+	Overall         ProgressInfo       `yaml:"overall" json:"overall"`
+	Collections     []CollectionStatus `yaml:"collections" json:"collections"`
+	ElapsedTime     time.Duration      `yaml:"elapsed_time" json:"elapsed_time"`
+	EstimatedRemain time.Duration      `yaml:"estimated_remain" json:"estimated_remain"`
+	Errors          []string           `yaml:"errors,omitempty" json:"errors,omitempty"`
 }
 
 // ProgressInfo tracks overall progress.
 type ProgressInfo struct {
-	DocsWritten     int64   `yaml:"docs_written"`
-	DocsTotal       int64   `yaml:"docs_total"`
-	BytesRead       int64   `yaml:"bytes_read"`
-	PercentComplete float64 `yaml:"percent_complete"`
-	ThroughputMBps  float64 `yaml:"throughput_mbps"`
+	DocsWritten     int64   `yaml:"docs_written" json:"docs_written"`
+	DocsTotal       int64   `yaml:"docs_total" json:"docs_total"`
+	BytesRead       int64   `yaml:"bytes_read" json:"bytes_read"`
+	PercentComplete float64 `yaml:"percent_complete" json:"percent_complete"`
+	ThroughputMBps  float64 `yaml:"throughput_mbps" json:"throughput_mbps"`
 }
 
 // CollectionStatus tracks per-collection progress.
 type CollectionStatus struct {
-	Name            string  `yaml:"name"`
-	State           string  `yaml:"state"` // "pending", "running", "completed", "failed"
-	DocsWritten     int64   `yaml:"docs_written"`
-	DocsTotal       int64   `yaml:"docs_total"`
-	PercentComplete float64 `yaml:"percent_complete"`
-	Error           string  `yaml:"error,omitempty"`
+	Name            string  `yaml:"name" json:"name"`
+	State           string  `yaml:"state" json:"state"`
+	DocsWritten     int64   `yaml:"docs_written" json:"docs_written"`
+	DocsTotal       int64   `yaml:"docs_total" json:"docs_total"`
+	PercentComplete float64 `yaml:"percent_complete" json:"percent_complete"`
+	Error           string  `yaml:"error,omitempty" json:"error,omitempty"`
 }
 
 // FailureAction defines what to do when a migration partially fails.

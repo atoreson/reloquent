@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 import { api } from "./client";
 import type {
   WizardState,
@@ -12,6 +14,7 @@ import type {
   TargetConfig,
   AWSConfig,
 } from "./types";
+import { STEP_ROUTES } from "./types";
 
 export function useWizardState() {
   return useQuery<WizardState>({
@@ -27,6 +30,19 @@ export function useSetStep() {
     mutationFn: (step: string) => api.put("/api/state/step", { step }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["state"] }),
   });
+}
+
+export function useNavigateToStep() {
+  const setStep = useSetStep();
+  const nav = useNavigate();
+  return useCallback(
+    (step: string) => {
+      setStep.mutate(step, {
+        onSuccess: () => nav(STEP_ROUTES[step]),
+      });
+    },
+    [setStep, nav],
+  );
 }
 
 export function useSourceConfig() {
@@ -102,6 +118,14 @@ export function useMapping() {
   return useQuery<Mapping>({
     queryKey: ["mapping"],
     queryFn: () => api.get("/api/mapping"),
+    retry: false,
+  });
+}
+
+export function useMappingPreview() {
+  return useQuery<Mapping>({
+    queryKey: ["mappingPreview"],
+    queryFn: () => api.get("/api/mapping/preview"),
     retry: false,
   });
 }

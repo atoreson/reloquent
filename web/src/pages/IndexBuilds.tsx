@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProgressBar } from "../components/ProgressBar";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
-import { useSetStep } from "../api/hooks";
+import { useNavigateToStep } from "../api/hooks";
 import { api } from "../api/client";
 
 interface IndexStatus {
@@ -14,7 +14,7 @@ interface IndexStatus {
 }
 
 export default function IndexBuilds() {
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   const { data: indexes } = useQuery<IndexStatus[]>({
     queryKey: ["index-status"],
@@ -86,7 +86,7 @@ export default function IndexBuilds() {
 
       {allComplete && (
         <div className="mt-6 flex gap-3">
-          <Button onClick={() => setStep.mutate("complete")}>
+          <Button onClick={() => goToStep("complete")}>
             Continue to Readiness
           </Button>
         </div>

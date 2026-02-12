@@ -7,9 +7,9 @@ import (
 
 // Explanation provides a plain-language explanation of a sizing recommendation.
 type Explanation struct {
-	Category string `yaml:"category"` // "spark", "mongodb", "time", "overview"
-	Summary  string `yaml:"summary"`
-	Detail   string `yaml:"detail"`
+	Category string `yaml:"category" json:"category"`
+	Summary  string `yaml:"summary" json:"summary"`
+	Detail   string `yaml:"detail" json:"detail"`
 }
 
 func generateExplanations(input Input, spark SparkPlan, mongo MongoPlan, estTime time.Duration) []Explanation {

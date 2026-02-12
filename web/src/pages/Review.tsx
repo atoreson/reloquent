@@ -1,17 +1,13 @@
-import { useState } from "react";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { useWizardState, useSetStep } from "../api/hooks";
+import { useWizardState, useNavigateToStep } from "../api/hooks";
 
 export default function Review() {
   const { data: state } = useWizardState();
-  const setStep = useSetStep();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const goToStep = useNavigateToStep();
 
-  const handleStartMigration = () => {
-    setStep.mutate("migration");
-    setShowConfirm(false);
+  const handleContinue = () => {
+    goToStep("target_connection");
   };
 
   const completedSteps = state
@@ -48,22 +44,12 @@ export default function Review() {
         <div className="flex gap-3">
           <Button
             variant="primary"
-            onClick={() => setShowConfirm(true)}
+            onClick={handleContinue}
           >
-            Start Migration
+            Continue to Target Connection
           </Button>
         </div>
       </div>
-
-      <ConfirmDialog
-        open={showConfirm}
-        title="Start Migration"
-        message="Are you sure you want to start the migration? This action cannot be undone. The migration will begin executing PySpark jobs against your source database and writing to MongoDB."
-        confirmLabel="Start Migration"
-        variant="danger"
-        onConfirm={handleStartMigration}
-        onCancel={() => setShowConfirm(false)}
-      />
     </div>
   );
 }

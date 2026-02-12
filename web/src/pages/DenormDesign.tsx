@@ -8,8 +8,9 @@ import { Alert } from "../components/Alert";
 import {
   useSchema,
   useMapping,
+  useMappingPreview,
   useSaveMapping,
-  useSetStep,
+  useNavigateToStep,
 } from "../api/hooks";
 import { useDesignerState } from "../hooks/useDesignerState";
 import { useDocumentPreview } from "../hooks/useDocumentPreview";
@@ -18,8 +19,12 @@ import type { Mapping, Embedded, Reference } from "../api/types";
 export default function DenormDesign() {
   const { data: schema, isLoading: schemaLoading } = useSchema();
   const { data: serverMapping, isLoading: mappingLoading } = useMapping();
+  const { data: previewMapping, isLoading: previewLoading } = useMappingPreview();
   const saveMapping = useSaveMapping();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
+
+  // Use saved mapping if available, otherwise fall back to auto-suggested preview
+  const initialMapping = serverMapping ?? previewMapping;
 
   const {
     mapping,
@@ -28,7 +33,7 @@ export default function DenormDesign() {
     redo,
     canUndo,
     canRedo,
-  } = useDesignerState(serverMapping);
+  } = useDesignerState(initialMapping);
 
   const [selectedEdge, setSelectedEdge] = useState<{
     source: string;
@@ -102,12 +107,12 @@ export default function DenormDesign() {
             return col;
 
           if (rel === "reference") {
-            // Convert to reference
+            // Convert to reference — remove from embedded, add to references
             const embedded = (col.embedded || []).filter(
               (e) => e.source_table !== target && e.source_table !== source,
             );
-            const refs: Reference[] = col.references || [];
             const t = target === col.source_table ? source : target;
+            const refs: Reference[] = [...(col.references || [])];
             if (!refs.some((r) => r.source_table === t)) {
               refs.push({
                 source_table: t,
@@ -118,24 +123,28 @@ export default function DenormDesign() {
             }
             return { ...col, embedded, references: refs };
           } else {
-            // Convert to embed
+            // Convert to embed — remove from references, add/update in embedded
             const refs = (col.references || []).filter(
               (r) => r.source_table !== target && r.source_table !== source,
             );
-            const embedded: Embedded[] = col.embedded || [];
             const t = target === col.source_table ? source : target;
-            const existing = embedded.find((e) => e.source_table === t);
-            if (existing) {
-              existing.relationship = rel;
-            } else {
-              embedded.push({
-                source_table: t,
-                field_name: t.toLowerCase(),
-                relationship: rel,
-                join_column: `${col.source_table}_id`,
-                parent_column: "id",
-              });
-            }
+            const existing = (col.embedded || []).find(
+              (e) => e.source_table === t,
+            );
+            const embedded: Embedded[] = existing
+              ? (col.embedded || []).map((e) =>
+                  e.source_table === t ? { ...e, relationship: rel } : e,
+                )
+              : [
+                  ...(col.embedded || []),
+                  {
+                    source_table: t,
+                    field_name: t.toLowerCase(),
+                    relationship: rel,
+                    join_column: `${col.source_table}_id`,
+                    parent_column: "id",
+                  },
+                ];
             return { ...col, embedded, references: refs };
           }
         });
@@ -168,11 +177,11 @@ export default function DenormDesign() {
 
   const handleSave = () => {
     saveMapping.mutate(mapping, {
-      onSuccess: () => setStep.mutate("type_mapping"),
+      onSuccess: () => goToStep("type_mapping"),
     });
   };
 
-  if (schemaLoading || mappingLoading) {
+  if (schemaLoading || (mappingLoading && previewLoading)) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />

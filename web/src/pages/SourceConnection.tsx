@@ -8,9 +8,9 @@ import {
   useSourceConfig,
   useTestSourceConnection,
   useDiscoverSchema,
-  useSetStep,
+  useNavigateToStep,
 } from "../api/hooks";
-import type { SourceConfig } from "../api/types";
+import type { SourceConfig, Schema } from "../api/types";
 
 const DEFAULT_PORTS: Record<string, number> = {
   postgresql: 5432,
@@ -28,11 +28,12 @@ export default function SourceConnection() {
     password: "",
     ssl: false,
   });
+  const [discoveredSchema, setDiscoveredSchema] = useState<Schema | null>(null);
 
   const sourceConfig = useSourceConfig();
   const testConn = useTestSourceConnection();
   const discover = useDiscoverSchema();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   useEffect(() => {
     if (sourceConfig.data && sourceConfig.data.host) {
@@ -59,8 +60,8 @@ export default function SourceConnection() {
 
   const handleDiscover = () => {
     discover.mutate(form, {
-      onSuccess: () => {
-        setStep.mutate("target_connection");
+      onSuccess: (schema) => {
+        setDiscoveredSchema(schema);
       },
     });
   };
@@ -166,6 +167,12 @@ export default function SourceConnection() {
           <Alert type="error">{discover.error.message}</Alert>
         )}
 
+        {discoveredSchema && (
+          <Alert type="success">
+            Discovered {discoveredSchema.tables.length} tables from {form.database}
+          </Alert>
+        )}
+
         <div className="flex gap-3 pt-4 border-t border-gray-200">
           <Button
             variant="secondary"
@@ -174,13 +181,19 @@ export default function SourceConnection() {
           >
             Test Connection
           </Button>
-          <Button
-            onClick={handleDiscover}
-            loading={discover.isPending}
-            disabled={!isConnected}
-          >
-            Discover Schema & Continue
-          </Button>
+          {!discoveredSchema ? (
+            <Button
+              onClick={handleDiscover}
+              loading={discover.isPending}
+              disabled={!isConnected}
+            >
+              Discover Schema
+            </Button>
+          ) : (
+            <Button onClick={() => goToStep("table_selection")}>
+              Continue to Table Selection
+            </Button>
+          )}
         </div>
       </div>
     </div>

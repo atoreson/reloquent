@@ -1,6 +1,6 @@
 import { Button } from "../components/Button";
 import { StatusBadge } from "../components/StatusBadge";
-import { useSetStep } from "../api/hooks";
+import { useNavigateToStep } from "../api/hooks";
 
 interface Check {
   name: string;
@@ -9,7 +9,7 @@ interface Check {
 }
 
 export default function PreMigration() {
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   // Pre-migration checks are evaluated server-side; for now show the checklist structure
   const checks: Check[] = [
@@ -63,8 +63,8 @@ export default function PreMigration() {
       </div>
 
       <div className="mt-6 flex gap-3">
-        <Button onClick={() => setStep.mutate("review")}>
-          Continue to Review
+        <Button onClick={() => goToStep("migration")}>
+          Continue to Migration
         </Button>
       </div>
     </div>

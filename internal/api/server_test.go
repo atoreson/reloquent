@@ -94,11 +94,27 @@ func TestSetStep_Backward(t *testing.T) {
 	}
 }
 
-func TestSetStep_Forward(t *testing.T) {
+func TestSetStep_ForwardOneStep(t *testing.T) {
 	s, _ := testServer(t)
 	mux := serveMux(s)
 
+	// One step forward (source_connection → table_selection) should succeed
 	body, _ := json.Marshal(SetStepRequest{Step: "table_selection"})
+	req := httptest.NewRequest("PUT", "/api/state/step", bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestSetStep_SkipAhead(t *testing.T) {
+	s, _ := testServer(t)
+	mux := serveMux(s)
+
+	// Skipping multiple steps (source_connection → denormalization) should fail
+	body, _ := json.Marshal(SetStepRequest{Step: "denormalization"})
 	req := httptest.NewRequest("PUT", "/api/state/step", bytes.NewReader(body))
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)

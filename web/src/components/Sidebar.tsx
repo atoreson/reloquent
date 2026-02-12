@@ -3,6 +3,9 @@ import { useWizardState } from "../api/hooks";
 import { ALL_STEPS, STEP_ROUTES } from "../api/types";
 
 const POINT_OF_NO_RETURN_STEPS = new Set([
+  "target_connection",
+  "aws_setup",
+  "pre_migration",
   "migration",
   "validation",
   "index_builds",

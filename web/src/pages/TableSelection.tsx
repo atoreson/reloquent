@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Button } from "../components/Button";
 import { Input } from "../components/FormField";
 import { Alert } from "../components/Alert";
-import { useTables, useSelectTables, useSetStep } from "../api/hooks";
+import { useTables, useSelectTables, useNavigateToStep } from "../api/hooks";
 
 function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024 * 1024)
@@ -23,7 +23,7 @@ type SortDir = "asc" | "desc";
 export default function TableSelection() {
   const { data: tables, isLoading, error } = useTables();
   const selectTables = useSelectTables();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<SortField>("name");
@@ -111,7 +111,7 @@ export default function TableSelection() {
   const handleContinue = () => {
     selectTables.mutate([...selected], {
       onSuccess: () => {
-        setStep.mutate("denormalization");
+        goToStep("denormalization");
       },
     });
   };

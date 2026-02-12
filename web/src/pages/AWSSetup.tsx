@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FormField, Input, Select } from "../components/FormField";
 import { Button } from "../components/Button";
 import { Alert } from "../components/Alert";
-import { useConfigureAWS, useSetStep } from "../api/hooks";
+import { useConfigureAWS, useNavigateToStep } from "../api/hooks";
 import type { AWSConfig } from "../api/types";
 
 const AWS_REGIONS = [
@@ -27,7 +27,7 @@ export default function AWSSetup() {
   });
 
   const configureAWS = useConfigureAWS();
-  const setStep = useSetStep();
+  const goToStep = useNavigateToStep();
 
   const update = (field: keyof AWSConfig, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -35,7 +35,7 @@ export default function AWSSetup() {
 
   const handleSave = () => {
     configureAWS.mutate(form, {
-      onSuccess: () => setStep.mutate("pre_migration"),
+      onSuccess: () => goToStep("pre_migration"),
     });
   };
 

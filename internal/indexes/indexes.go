@@ -15,8 +15,8 @@ import (
 
 // IndexPlan describes the set of indexes to create on the target.
 type IndexPlan struct {
-	Indexes      []target.CollectionIndex `yaml:"indexes"`
-	Explanations []string                 `yaml:"explanations"`
+	Indexes      []target.CollectionIndex `yaml:"indexes" json:"indexes"`
+	Explanations []string                 `yaml:"explanations" json:"explanations"`
 }
 
 // Infer generates an IndexPlan from the source schema and mapping.
