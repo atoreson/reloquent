@@ -282,12 +282,19 @@ func TestSuggest_MultiLevelHierarchy(t *testing.T) {
 	if cust == nil {
 		t.Fatal("customers collection not found")
 	}
-	// orders should be embedded in customers
-	if len(cust.Embedded) != 1 {
-		t.Fatalf("customers.embedded = %d, want 1", len(cust.Embedded))
+	// orders and order_items should both be embedded in customers (recursive)
+	if len(cust.Embedded) != 2 {
+		t.Fatalf("customers.embedded = %d, want 2", len(cust.Embedded))
 	}
-	if cust.Embedded[0].SourceTable != "orders" {
-		t.Errorf("embedded = %q, want orders", cust.Embedded[0].SourceTable)
+	embNames := make(map[string]bool)
+	for _, e := range cust.Embedded {
+		embNames[e.SourceTable] = true
+	}
+	if !embNames["orders"] {
+		t.Error("expected orders to be embedded in customers")
+	}
+	if !embNames["order_items"] {
+		t.Error("expected order_items to be embedded in customers")
 	}
 }
 

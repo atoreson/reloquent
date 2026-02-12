@@ -101,6 +101,25 @@ func Suggest(s *schema.Schema, selectedTables []string, rootTables ...string) *M
 		tableMap[t.Name] = t
 	}
 
+	// Build reverse index: parent table -> list of (child table, FK)
+	childrenOf := make(map[string][]struct {
+		table string
+		fk    schema.ForeignKey
+	})
+	for _, t := range s.Tables {
+		if !selected[t.Name] {
+			continue
+		}
+		for _, fk := range t.ForeignKeys {
+			if selected[fk.ReferencedTable] && t.Name != fk.ReferencedTable {
+				childrenOf[fk.ReferencedTable] = append(childrenOf[fk.ReferencedTable], struct {
+					table string
+					fk    schema.ForeignKey
+				}{table: t.Name, fk: fk})
+			}
+		}
+	}
+
 	for _, root := range roots {
 		if used[root] {
 			continue
@@ -110,58 +129,63 @@ func Suggest(s *schema.Schema, selectedTables []string, rootTables ...string) *M
 			SourceTable: root,
 		}
 
-		// Find children that reference this root
-		for _, t := range s.Tables {
-			if !selected[t.Name] || t.Name == root || used[t.Name] {
-				continue
-			}
-			for _, fk := range t.ForeignKeys {
-				if fk.ReferencedTable != root {
+		// BFS: embed all reachable children recursively
+		queue := []string{root}
+		used[root] = true
+		for len(queue) > 0 {
+			parent := queue[0]
+			queue = queue[1:]
+
+			for _, child := range childrenOf[parent] {
+				if used[child.table] {
 					continue
 				}
-				if selfRefs[t.Name] {
-					// Self-ref → reference
+				if selfRefs[child.table] {
 					col.References = append(col.References, Reference{
-						SourceTable:  t.Name,
-						FieldName:    t.Name + "_ref",
-						JoinColumn:   fk.Columns[0],
-						ParentColumn: fk.ReferencedColumns[0],
+						SourceTable:  child.table,
+						FieldName:    child.table + "_ref",
+						JoinColumn:   child.fk.Columns[0],
+						ParentColumn: child.fk.ReferencedColumns[0],
 					})
 				} else {
-					// Determine array vs single
 					rel := "array"
-					parent := tableMap[root]
-					child := tableMap[t.Name]
-					if parent.RowCount > 0 && child.RowCount > 0 {
-						ratio := float64(child.RowCount) / float64(parent.RowCount)
+					parentT := tableMap[parent]
+					childT := tableMap[child.table]
+					if parentT.RowCount > 0 && childT.RowCount > 0 {
+						ratio := float64(childT.RowCount) / float64(parentT.RowCount)
 						if ratio <= 1.0 {
 							rel = "single"
 						}
 					}
 
 					col.Embedded = append(col.Embedded, Embedded{
-						SourceTable:  t.Name,
-						FieldName:    t.Name,
+						SourceTable:  child.table,
+						FieldName:    child.table,
 						Relationship: rel,
-						JoinColumn:   fk.Columns[0],
-						ParentColumn: fk.ReferencedColumns[0],
+						JoinColumn:   child.fk.Columns[0],
+						ParentColumn: child.fk.ReferencedColumns[0],
 					})
+					// Continue BFS from this child to find deeper tables
+					queue = append(queue, child.table)
 				}
-				used[t.Name] = true
+				used[child.table] = true
 			}
 		}
 
-		used[root] = true
 		collections = append(collections, col)
 	}
 
-	// Any remaining selected tables get their own collection
-	for _, t := range s.Tables {
-		if selected[t.Name] && !used[t.Name] {
-			collections = append(collections, Collection{
-				Name:        t.Name,
-				SourceTable: t.Name,
-			})
+	// Any remaining selected tables get their own collection,
+	// but only when roots were auto-detected. When roots are explicit,
+	// the user chose exactly which tables become collections.
+	if len(rootTables) == 0 {
+		for _, t := range s.Tables {
+			if selected[t.Name] && !used[t.Name] {
+				collections = append(collections, Collection{
+					Name:        t.Name,
+					SourceTable: t.Name,
+				})
+			}
 		}
 	}
 
