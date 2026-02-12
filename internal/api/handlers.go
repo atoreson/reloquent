@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/reloquent/reloquent/internal/config"
 	"github.com/reloquent/reloquent/internal/migration"
@@ -500,7 +501,17 @@ func (s *Server) handleReadinessImpl(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetMappingPreviewImpl(w http.ResponseWriter, r *http.Request) {
-	m, err := s.engine.PreviewMapping()
+	// Accept optional ?roots=table1,table2 to specify root collections
+	var roots []string
+	if rootsParam := r.URL.Query().Get("roots"); rootsParam != "" {
+		for _, t := range strings.Split(rootsParam, ",") {
+			t = strings.TrimSpace(t)
+			if t != "" {
+				roots = append(roots, t)
+			}
+		}
+	}
+	m, err := s.engine.PreviewMapping(roots...)
 	if err != nil {
 		errorResponse(w, http.StatusInternalServerError, err.Error())
 		return

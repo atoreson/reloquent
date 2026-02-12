@@ -122,10 +122,11 @@ export function useMapping() {
   });
 }
 
-export function useMappingPreview() {
+export function useMappingPreview(rootTables?: string[]) {
+  const rootsParam = rootTables?.length ? `?roots=${rootTables.join(",")}` : "";
   return useQuery<Mapping>({
-    queryKey: ["mappingPreview"],
-    queryFn: () => api.get("/api/mapping/preview"),
+    queryKey: ["mappingPreview", rootTables],
+    queryFn: () => api.get(`/api/mapping/preview${rootsParam}`),
     retry: false,
   });
 }

@@ -753,7 +753,8 @@ func (e *Engine) CheckReadiness(ctx context.Context) (*report.MigrationReport, e
 }
 
 // PreviewMapping returns a suggested mapping based on schema and selected tables.
-func (e *Engine) PreviewMapping() (*mapping.Mapping, error) {
+// If rootTables is non-empty, only those tables become root collections.
+func (e *Engine) PreviewMapping(rootTables ...string) (*mapping.Mapping, error) {
 	if e.Schema == nil {
 		return nil, fmt.Errorf("no schema discovered yet")
 	}
@@ -761,7 +762,7 @@ func (e *Engine) PreviewMapping() (*mapping.Mapping, error) {
 		return nil, fmt.Errorf("no tables selected")
 	}
 
-	return mapping.Suggest(e.Schema, e.State.SelectedTables), nil
+	return mapping.Suggest(e.Schema, e.State.SelectedTables, rootTables...), nil
 }
 
 // MappingSizeEstimate returns per-collection BSON size estimates.

@@ -5,13 +5,15 @@ import (
 )
 
 // Suggest analyzes a schema's FK graph and returns a suggested mapping.
+// If rootTables is non-empty, only those tables become root collections;
+// otherwise roots are inferred from the FK graph.
 // Rules:
 //   - 1:1 FK → embed single
 //   - 1:N FK → embed array (if child has < 1000 rows per parent on average)
 //   - M:N (join tables) → dissolve into arrays on both sides
 //   - Self-referencing FK → reference (not embed)
 //   - Cycles → break by converting deepest edge to reference
-func Suggest(s *schema.Schema, selectedTables []string) *Mapping {
+func Suggest(s *schema.Schema, selectedTables []string, rootTables ...string) *Mapping {
 	selected := make(map[string]bool)
 	for _, t := range selectedTables {
 		selected[t] = true
@@ -61,26 +63,35 @@ func Suggest(s *schema.Schema, selectedTables []string) *Mapping {
 	collections := make([]Collection, 0)
 	used := make(map[string]bool) // tables already assigned to a collection
 
-	// First pass: identify root tables (tables not embedded anywhere)
+	// First pass: identify root tables
 	roots := make([]string, 0)
-	for _, t := range s.Tables {
-		if !selected[t.Name] {
-			continue
+	if len(rootTables) > 0 {
+		// Use explicitly provided roots
+		for _, r := range rootTables {
+			if selected[r] {
+				roots = append(roots, r)
+			}
 		}
-		if joinTables[t.Name] {
-			continue // skip join tables
-		}
+	} else {
 		// Heuristic: tables with no FK pointing out, or that are the "parent" side
-		if len(childOf[t.Name]) == 0 || selfRefs[t.Name] {
-			roots = append(roots, t.Name)
-		}
-	}
-
-	// If no roots found (everything has FKs), use all selected tables
-	if len(roots) == 0 {
 		for _, t := range s.Tables {
-			if selected[t.Name] && !joinTables[t.Name] {
+			if !selected[t.Name] {
+				continue
+			}
+			if joinTables[t.Name] {
+				continue // skip join tables
+			}
+			if len(childOf[t.Name]) == 0 || selfRefs[t.Name] {
 				roots = append(roots, t.Name)
+			}
+		}
+
+		// If no roots found (everything has FKs), use all selected tables
+		if len(roots) == 0 {
+			for _, t := range s.Tables {
+				if selected[t.Name] && !joinTables[t.Name] {
+					roots = append(roots, t.Name)
+				}
 			}
 		}
 	}

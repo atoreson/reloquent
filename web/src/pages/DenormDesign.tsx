@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { DesignerCanvas } from "../components/designer/DesignerCanvas";
 import { EdgeConfigPanel } from "../components/designer/EdgeConfigPanel";
 import { DocumentPreview } from "../components/designer/DocumentPreview";
 import { DesignerToolbar } from "../components/designer/DesignerToolbar";
 import { Alert } from "../components/Alert";
+import { Button } from "../components/Button";
 import {
   useSchema,
   useMapping,
@@ -16,15 +17,111 @@ import { useDesignerState } from "../hooks/useDesignerState";
 import { useDocumentPreview } from "../hooks/useDocumentPreview";
 import type { Mapping, Embedded, Reference } from "../api/types";
 
+function RootCollectionPicker({
+  tables,
+  selected,
+  onToggle,
+  onConfirm,
+}: {
+  tables: { name: string; row_count: number; fk_count: number }[];
+  selected: Set<string>;
+  onToggle: (table: string) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-8">
+      <div className="max-w-2xl w-full">
+        <h2 className="text-2xl font-bold text-gray-900">
+          Denormalization Design
+        </h2>
+        <p className="mt-2 text-gray-600">
+          Choose which tables should become <strong>root MongoDB collections</strong>.
+          All other tables will be embedded as subdocuments within these collections.
+        </p>
+
+        <div className="mt-6 rounded-lg border border-gray-200 bg-white overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-4 py-2 text-left w-10"></th>
+                <th className="px-4 py-2 text-left font-medium text-gray-700">Table</th>
+                <th className="px-4 py-2 text-right font-medium text-gray-700">Rows</th>
+                <th className="px-4 py-2 text-right font-medium text-gray-700">Foreign Keys</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tables.map((t) => (
+                <tr
+                  key={t.name}
+                  className={`border-b border-gray-100 cursor-pointer transition-colors ${
+                    selected.has(t.name)
+                      ? "bg-blue-50"
+                      : "hover:bg-gray-50"
+                  }`}
+                  onClick={() => onToggle(t.name)}
+                >
+                  <td className="px-4 py-2.5">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(t.name)}
+                      onChange={() => onToggle(t.name)}
+                      className="rounded border-gray-300 text-blue-600"
+                    />
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-gray-900">{t.name}</td>
+                  <td className="px-4 py-2.5 text-right text-gray-600">
+                    {t.row_count.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-2.5 text-right text-gray-600">{t.fk_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="mt-3 text-xs text-gray-500">
+          Tip: Tables with no foreign keys (like <code>actor</code>, <code>category</code>) are
+          natural roots. Tables with foreign keys (like <code>film_actor</code>) are usually
+          embedded into the table they reference.
+        </p>
+
+        <div className="mt-4 flex gap-3">
+          <Button onClick={onConfirm} disabled={selected.size === 0}>
+            Generate Mapping ({selected.size} collection{selected.size !== 1 ? "s" : ""})
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DenormDesign() {
   const { data: schema, isLoading: schemaLoading } = useSchema();
   const { data: serverMapping, isLoading: mappingLoading } = useMapping();
-  const { data: previewMapping, isLoading: previewLoading } = useMappingPreview();
   const saveMapping = useSaveMapping();
   const goToStep = useNavigateToStep();
 
-  // Use saved mapping if available, otherwise fall back to auto-suggested preview
-  const initialMapping = serverMapping ?? previewMapping;
+  // Root collection selection state
+  const [rootTables, setRootTables] = useState<Set<string>>(new Set());
+  const [rootsConfirmed, setRootsConfirmed] = useState(false);
+
+  // Only fetch preview after roots are confirmed
+  const { data: previewMapping } = useMappingPreview(
+    rootsConfirmed ? Array.from(rootTables) : undefined,
+  );
+
+  // Use saved mapping if available, otherwise use preview after roots confirmed
+  const initialMapping = serverMapping ?? (rootsConfirmed ? previewMapping : undefined);
+
+  // If server already has a mapping, skip the picker
+  useEffect(() => {
+    if (serverMapping && serverMapping.collections.length > 0) {
+      setRootsConfirmed(true);
+      setRootTables(
+        new Set(serverMapping.collections.map((c) => c.source_table)),
+      );
+    }
+  }, [serverMapping]);
 
   const {
     mapping,
@@ -46,7 +143,6 @@ export default function DenormDesign() {
 
   const handleEdgeClick = useCallback(
     (source: string, target: string) => {
-      // Find what relationship this edge represents
       let rel = "reference";
       for (const col of mapping.collections) {
         const emb = col.embedded?.find(
@@ -65,7 +161,6 @@ export default function DenormDesign() {
         }
       }
       setSelectedEdge({ source, target, relationship: rel });
-      // Set collection for preview
       const col = mapping.collections.find(
         (c) => c.source_table === source || c.source_table === target,
       );
@@ -80,7 +175,7 @@ export default function DenormDesign() {
         const cols = [...m.collections];
         const parentCol = cols.find((c) => c.source_table === source);
         if (parentCol) {
-          const embedded: Embedded[] = parentCol.embedded || [];
+          const embedded: Embedded[] = [...(parentCol.embedded || [])];
           embedded.push({
             source_table: target,
             field_name: target.toLowerCase(),
@@ -88,7 +183,12 @@ export default function DenormDesign() {
             join_column: `${source}_id`,
             parent_column: "id",
           });
-          parentCol.embedded = embedded;
+          return {
+            ...m,
+            collections: cols.map((c) =>
+              c === parentCol ? { ...c, embedded } : c,
+            ),
+          };
         }
         return { ...m, collections: cols };
       });
@@ -107,7 +207,6 @@ export default function DenormDesign() {
             return col;
 
           if (rel === "reference") {
-            // Convert to reference — remove from embedded, add to references
             const embedded = (col.embedded || []).filter(
               (e) => e.source_table !== target && e.source_table !== source,
             );
@@ -123,7 +222,6 @@ export default function DenormDesign() {
             }
             return { ...col, embedded, references: refs };
           } else {
-            // Convert to embed — remove from references, add/update in embedded
             const refs = (col.references || []).filter(
               (r) => r.source_table !== target && r.source_table !== source,
             );
@@ -181,7 +279,7 @@ export default function DenormDesign() {
     });
   };
 
-  if (schemaLoading || (mappingLoading && previewLoading)) {
+  if (schemaLoading || mappingLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
@@ -193,17 +291,50 @@ export default function DenormDesign() {
     return <Alert type="warning">No schema discovered yet. Complete Step 1 first.</Alert>;
   }
 
+  // Show root collection picker if roots not yet confirmed
+  if (!rootsConfirmed) {
+    const tableInfo = schema.tables.map((t) => ({
+      name: t.name,
+      row_count: t.row_count || 0,
+      fk_count: (t.foreign_keys || []).length,
+    }));
+
+    return (
+      <RootCollectionPicker
+        tables={tableInfo}
+        selected={rootTables}
+        onToggle={(name) =>
+          setRootTables((prev) => {
+            const next = new Set(prev);
+            if (next.has(name)) next.delete(name);
+            else next.add(name);
+            return next;
+          })
+        }
+        onConfirm={() => setRootsConfirmed(true)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full p-4 gap-3">
-      <div className="shrink-0">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Denormalization Design
-        </h2>
-        <p className="mt-1 text-gray-600 text-sm">
-          Design how source tables map to MongoDB documents. Click an edge to
-          configure the relationship. Drag from one node to another to create a
-          new relationship.
-        </p>
+      <div className="shrink-0 flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Denormalization Design
+          </h2>
+          <p className="mt-1 text-gray-600 text-sm">
+            Design how source tables map to MongoDB documents. Click an edge to
+            configure the relationship. Drag from one node to another to create a
+            new relationship.
+          </p>
+        </div>
+        <button
+          onClick={() => setRootsConfirmed(false)}
+          className="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap ml-4"
+        >
+          Change Root Tables
+        </button>
       </div>
 
       <DesignerToolbar
@@ -253,10 +384,10 @@ export default function DenormDesign() {
             collectionName={selectedCollection}
           />
 
-          {mapping.collections.length > 1 && (
+          {mapping.collections.length > 0 && (
             <div className="rounded-lg border border-gray-200 bg-white p-3">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Collections
+                Collections ({mapping.collections.length})
               </h3>
               <ul className="space-y-1">
                 {mapping.collections.map((col) => (
@@ -270,6 +401,11 @@ export default function DenormDesign() {
                       }`}
                     >
                       {col.name}
+                      {(col.embedded?.length ?? 0) > 0 && (
+                        <span className="text-xs text-gray-400 ml-1">
+                          ({col.embedded!.length} embedded)
+                        </span>
+                      )}
                     </button>
                   </li>
                 ))}
